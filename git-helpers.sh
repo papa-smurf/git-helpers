@@ -270,7 +270,8 @@ function vcs-pull-request() {
 
     # TODO: Make repository dynamic instead of mandatory (using git remote)
     # TODO: Conditional for OS (e.g. open for OSX)
-    # TODO: ?expand=1
+    # TODO: Make sure this also works for repositories hosted by bitbucket
+    # TODO: ?expand=1 for github
     explorer "https://github.com/$REPOSITORY/compare/$BRANCH"
 }
 
