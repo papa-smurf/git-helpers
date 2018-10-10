@@ -203,10 +203,6 @@ function vcs-discard() {
     git checkout . && git reset --hard
 }
 
-function vcs-init() {
-    eval $(ssh-agent) && ssh-add id_rsa
-}
-
 function vcs-master() {
     vcs checkout master && vcs pull
 }
