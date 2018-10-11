@@ -34,7 +34,7 @@ Branching methods:
 
 Workflow methods:
     master                                      Checkout the master branch
-    pull-request [REPOSITORY]                   Create a pull request on GitHub for the active branch on the given repository
+    pull-request                                Create a pull request for the active branch
 EOF
 
         return 0
@@ -294,20 +294,32 @@ function vcs-merge() {
 
 function vcs-pull-request() {
     BRANCH=$(vcs current-branch)
-    REPOSITORY=$1
+    ENDPOINT=''
+    PUSH_URL=$(git remote get-url --push origin)
 
+    # We need to push first to make sure we have a remote push url
     vcs push
 
-    METHOD='explorer'
+    # Render the PR endpoint for github
+    if [[ $PUSH_URL == *"github.com:"* ]]; then
+        REPOSITORY=$(echo "$PUSH_URL" | grep -o -P '(?<=\:).*(?=\.git)')
+        ENDPOINT="https://github.com/$REPOSITORY/compare/$BRANCH?expand=1"
+    fi
+
+    # Without an endpoint there's no reason to continue
+    if [ "$ENDPOINT" == '' ]; then
+        echo "Couldn't determine the repository host for push url '$PUSH_URL'"
+        return 0
+    fi
+
+    METHOD='start'
     TYPE="$(type -t ${METHOD})"
 
     if [ "$TYPE" != "function" ]; then
         METHOD='open'
     fi
 
-    # TODO: Make repository dynamic instead of mandatory (using git remote)
     # TODO: Make sure this also works for repositories hosted by bitbucket
-    # TODO: ?expand=1 for github
     $METHOD "https://github.com/$REPOSITORY/compare/$BRANCH"
 }
 
