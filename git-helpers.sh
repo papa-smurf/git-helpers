@@ -53,7 +53,7 @@ EOF
         [capr]=commit-all-pull-request
         [cn]=checkout-new
         [d]=discard
-        [me]=branch-merge
+        [me]=merge
         [ma]=master
         [p]=push
         [pr]=pull-request
