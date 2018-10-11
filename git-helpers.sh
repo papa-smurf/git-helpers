@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO: Error handling and input validation/sanitation
+
 function vcs(){
     # Show the usage help in case no arguments (or the help flag) were provided
     if [ -z ${1+x} ] || ([ $1 == '-h' ] || [ $1 == '--help' ]); then
@@ -300,6 +302,7 @@ function vcs-pull-request() {
     # We need to push first to make sure we have a remote push url
     vcs push
 
+    # TODO: Make sure this also works for repositories hosted elsewhere
     # Render the PR endpoint for github
     if [[ $PUSH_URL == *"github.com:"* ]]; then
         REPOSITORY=$(echo "$PUSH_URL" | grep -o -P '(?<=\:).*(?=\.git)')
@@ -315,12 +318,11 @@ function vcs-pull-request() {
     METHOD='start'
     TYPE="$(type -t ${METHOD})"
 
-    if [ "$TYPE" != "function" ]; then
+    if [ "$TYPE" != "file" ]; then
         METHOD='open'
     fi
 
-    # TODO: Make sure this also works for repositories hosted by bitbucket
-    $METHOD "https://github.com/$REPOSITORY/compare/$BRANCH"
+    $METHOD $ENDPOINT
 }
 
 function vcs-push() {
