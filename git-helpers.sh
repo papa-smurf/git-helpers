@@ -40,22 +40,50 @@ EOF
         return 0
     fi
 
-    # If a method is given but doesn't exist within vcs, we pass everything on to git instead
-    METHOD="vcs-$1"
-    TYPE="$(type -t ${METHOD})"
+    # Method shorthand dictionary
+    declare -A METHOD_DICTIONARY=(
+        [bd]=branch-delete
+        [br]=branch-rename
+        [c]=checkout
+        [ca]=commit-all
+        [cb]=current-branch
+        [ch]=commit-history
+        [cn]=checkout-new
+        [cap]=commit-all-push
+        [capr]=commit-all-pull-request
+        [cn]=checkout-new
+        [d]=discard
+        [me]=branch-merge
+        [ma]=master
+        [p]=push
+        [pr]=pull-request
+        [s]=search
+    )
 
-    # TODO: Shorthand dictionary (e.g. commit-all-push = cap)
+    METHOD="$1"
 
+    # Check if the given method name exists
+    TYPE="$(type -t vcs-${METHOD})"
+
+    # If the given method does not exist we first check if a shorthand was provided instead
     if [ "$TYPE" != "function" ]; then
-        git "$@"
+        METHOD=${METHOD_DICTIONARY[${METHOD}]}
+        TYPE="$(type -t vcs-${METHOD})"
+    fi
+
+    if [ "$TYPE" == "function" ]; then
+        METHOD="vcs-$METHOD"
+
+        # Call the appropriate vcs method
+        # Remove the first argument (which would normally include the method name)
+        set -- "${@:2}"
+
+        $METHOD "$@"
         return 0
     fi
 
-    # Call the appropriate vcs method
-    # Remove the first argument (which would normally include the method name
-    set -- "${@:2}" #removed the 1st parameter
-
-    $METHOD "$@"
+    # If a method is given but doesn't exist within vcs, we pass everything on to git instead
+    git "$@"
 }
 
 function vcs-current-branch() {
