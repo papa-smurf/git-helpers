@@ -135,12 +135,14 @@ function vcs-commit-all() {
     git add . && git commit -m "$MESSAGE"
 }
 
+function vcs-commit-all-pull-request() {
+    vcs-commit-all-push $1 && vcs-pull-request $2
+}
+
 function vcs-commit-all-push() {
     MESSAGE=$1
     vcs commit-all "$MESSAGE" && vcs push
 }
-
-# TODO: commit-all-pull-request (capr)
 
 function vcs-commit-history() {
     MAXCOUNT=5
@@ -296,11 +298,17 @@ function vcs-pull-request() {
 
     vcs push
 
+    METHOD='explorer'
+    TYPE="$(type -t ${METHOD})"
+
+    if [ "$TYPE" != "function" ]; then
+        METHOD='open'
+    fi
+
     # TODO: Make repository dynamic instead of mandatory (using git remote)
-    # TODO: Conditional for OS (e.g. open for OSX)
     # TODO: Make sure this also works for repositories hosted by bitbucket
     # TODO: ?expand=1 for github
-    explorer "https://github.com/$REPOSITORY/compare/$BRANCH"
+    $METHOD "https://github.com/$REPOSITORY/compare/$BRANCH"
 }
 
 function vcs-push() {
