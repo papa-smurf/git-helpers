@@ -33,7 +33,7 @@ $ vcs checkout bug/
 Pick a number [1-2]:
 ``` 
 
-This is very helpful in situations where you have a large number of branches and aren't able to keep track on all of them.
+This is very helpful in situations where you have a large number of branches and aren't able to keep track of all of them.
 
 ## Why vcs?
 
