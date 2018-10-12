@@ -302,11 +302,14 @@ function vcs-pull-request() {
     # We need to push first to make sure we have a remote push url
     vcs push
 
-    # TODO: Make sure this also works for repositories hosted elsewhere
     # Render the PR endpoint for github
-    if [[ $PUSH_URL == *"github.com:"* ]]; then
+    if [[ $PUSH_URL == *"github.com"* ]]; then
         REPOSITORY=$(echo "$PUSH_URL" | grep -o -P '(?<=\:).*(?=\.git)')
-        ENDPOINT="https://github.com/$REPOSITORY/compare/$BRANCH?expand=1"
+        ENDPOINT="https://github.com/${REPOSITORY}/compare/${BRANCH}?expand=1"
+    # Render the PR endpoint for bitbucket
+    elif [[ $PUSH_URL == *"bitbucket.org"* ]]; then
+        REPOSITORY=$(echo "$PUSH_URL" | grep -o -P '(?<=bitbucket.org\/).*(?=\.git)')
+        ENDPOINT="https://bitbucket.org/${REPOSITORY}/pull-requests/new?source=${REPOSITORY}:${BRANCH}"
     fi
 
     # Without an endpoint there's no reason to continue
