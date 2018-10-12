@@ -45,4 +45,4 @@ alias gh='vcs'
 
 ## Disclaimer
 
-I am in no way a veteran when it comes to shell scripting and as such this tool is not as fool-proof as I'd like it to be. If you have any suggestions or improvements I'd appreciate it if you use the issues section or create a pull-request. Thanks!
+I am by no means a veteran when it comes to shell scripting and as such this tool is not as fool-proof as I'd like it to be. If you have any suggestions or improvements I'd appreciate it if you use the issues section or create a pull-request. Thanks!
