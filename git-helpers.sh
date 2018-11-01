@@ -163,9 +163,10 @@ function vcs-commit-history() {
 # vcs branch-delete master -f|--force
 function vcs-branch-delete() {
     # TODO: Bulk delete
+    # TODO: Partial branch name delete
 
     if [ "$1" == $(vcs current-branch) ]; then
-        echo "You can't delete a branch you're currently checked out at!"
+        echo "You can't delete the currently active branch!"
         return 0
     fi
 
