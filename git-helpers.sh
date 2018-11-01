@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# TODO: Rename vcs to vc
 # TODO: Error handling and input validation/sanitation
 
 function vcs(){
@@ -138,7 +139,7 @@ function vcs-commit-all() {
 }
 
 function vcs-commit-all-pull-request() {
-    vcs-commit-all-push $1 && vcs-pull-request $2
+    vcs-commit-all-push "${1}" && vcs-pull-request $2
 }
 
 function vcs-commit-all-push() {
@@ -232,6 +233,8 @@ function vcs-branch-rename() {
 }
 
 function vcs-discard() {
+    # TODO: Add support for single file discards
+
     git checkout . && git reset --hard
 }
 
@@ -295,6 +298,8 @@ function vcs-merge() {
 }
 
 function vcs-pull-request() {
+    # TODO: Add support for a pull request base (compare branch x with branch y)
+
     BRANCH=$(vcs current-branch)
     ENDPOINT=''
     PUSH_URL=$(git remote get-url --push origin)
@@ -335,6 +340,9 @@ function vcs-push() {
 
 function vcs-sanitize-branch-name() {
     BRANCH=$1
+
+    # TODO: Take care of percentage signs
+
     BRANCH=$(echo $BRANCH | sed -e "s/\&/ and /g")
     BRANCH=$(echo $BRANCH | sed -e "s/\ /_/g")
 
