@@ -1,20 +1,19 @@
 #!/usr/bin/env bash
 
-# TODO: Rename vcs to vc
 # TODO: Error handling and input validation/sanitation
 
-function vcs(){
+function vc(){
     # Show the usage help in case no arguments (or the help flag) were provided
     if [ -z ${1+x} ] || ([ $1 == '-h' ] || [ $1 == '--help' ]); then
 
         cat << EOF
 
 Usage:
-    vcs
-    vcs [-help | --help]|[method] [arguments]
+    vc
+    vc [-help | --help]|[method] [arguments]
 
 Example:
-    vcs search sprint_70
+    vc search sprint_70
 
 General methods:
     discard                                     Discard all (un)staged local changes
@@ -66,18 +65,18 @@ EOF
     METHOD="$1"
 
     # Check if the given method name exists
-    TYPE="$(type -t vcs-${METHOD})"
+    TYPE="$(type -t vc-${METHOD})"
 
     # If the given method does not exist we first check if a shorthand was provided instead
     if [ "$TYPE" != "function" ]; then
         METHOD=${METHOD_DICTIONARY[${METHOD}]}
-        TYPE="$(type -t vcs-${METHOD})"
+        TYPE="$(type -t vc-${METHOD})"
     fi
 
     if [ "$TYPE" == "function" ]; then
-        METHOD="vcs-$METHOD"
+        METHOD="vc-$METHOD"
 
-        # Call the appropriate vcs method
+        # Call the appropriate vc method
         # Remove the first argument (which would normally include the method name)
         set -- "${@:2}"
 
@@ -85,20 +84,20 @@ EOF
         return 0
     fi
 
-    # If a method is given but doesn't exist within vcs, we pass everything on to git instead
+    # If a method is given but doesn't exist within vc, we pass everything on to git instead
     git "$@"
 }
 
-function vcs-current-branch() {
-    BRANCH=$(vcs rev-parse --abbrev-ref HEAD)
+function vc-current-branch() {
+    BRANCH=$(vc rev-parse --abbrev-ref HEAD)
     echo "$BRANCH"
 }
 
-function vcs-checkout(){
+function vc-checkout(){
     BRANCH=$1
     git fetch origin "$BRANCH" &> /dev/null
 
-    BRANCH_EXISTS=$(vcs branch-exists "$BRANCH")
+    BRANCH_EXISTS=$(vc branch-exists "$BRANCH")
 
     # The given branch name exists, perform and checkout and abort
     if [ "$BRANCH_EXISTS" == 'true' ]; then
@@ -109,8 +108,8 @@ function vcs-checkout(){
     PHRASE="$BRANCH"
 
     # The branch name did not exist, continue with a search instead
-    BRANCHES=$(vcs search $PHRASE)
-    BRANCH=$(vcs select-result $BRANCHES)
+    BRANCHES=$(vc search $PHRASE)
+    BRANCH=$(vc select-result $BRANCHES)
 
     if [ -z $BRANCH ]; then
         echo "No branch found for phrase '$PHRASE'"
@@ -120,34 +119,34 @@ function vcs-checkout(){
     git checkout $BRANCH
 }
 
-function vcs-checkout-new(){
+function vc-checkout-new(){
     # By default we use the current branch as base
-    BASE=$(vcs current-branch)
+    BASE=$(vc current-branch)
 
     # A second argument was provided, use it as base
     if [ ! -z $2 ] && [ "$2" != "$BASE" ] ; then
-        vcs checkout "$2" && vcs pull &> /dev/null
+        vc checkout "$2" && vc pull &> /dev/null
     fi
 
-    BRANCH=$(vcs sanitize-branch-name "$1")
+    BRANCH=$(vc sanitize-branch-name "$1")
     git checkout -b "$BRANCH"
 }
 
-function vcs-commit-all() {
+function vc-commit-all() {
     MESSAGE=$1
     git add . && git commit -m "$MESSAGE"
 }
 
-function vcs-commit-all-pull-request() {
-    vcs-commit-all-push "${1}" && vcs-pull-request $2
+function vc-commit-all-pull-request() {
+    vc-commit-all-push "${1}" && vc-pull-request $2
 }
 
-function vcs-commit-all-push() {
+function vc-commit-all-push() {
     MESSAGE=$1
-    vcs commit-all "$MESSAGE" && vcs push
+    vc commit-all "$MESSAGE" && vc push
 }
 
-function vcs-commit-history() {
+function vc-commit-history() {
     MAXCOUNT=5
 
     if [ ! -z $1 ]; then
@@ -159,13 +158,13 @@ function vcs-commit-history() {
 
 # Supports:
 #
-# vcs branch-delete master
-# vcs branch-delete master -f|--force
-function vcs-branch-delete() {
+# vc branch-delete master
+# vc branch-delete master -f|--force
+function vc-branch-delete() {
     # TODO: Bulk delete
     # TODO: Partial branch name delete
 
-    if [ "$1" == $(vcs current-branch) ]; then
+    if [ "$1" == $(vc current-branch) ]; then
         echo "You can't delete the currently active branch!"
         return 0
     fi
@@ -178,7 +177,7 @@ function vcs-branch-delete() {
     fi
 }
 
-function vcs-branch-exists() {
+function vc-branch-exists() {
     BRANCH=$1
 
     EXISTS=$(git rev-parse --verify "$1" 2>&1 >/dev/null)
@@ -193,14 +192,14 @@ function vcs-branch-exists() {
 
 # Supports:
 #
-# vcs branch-rename newname
-# vcs branch-rename newname -f|--force
-# vcs branch-rename oldname newname
-# vcs branch-rename oldname newname -f|--force
-function vcs-branch-rename() {
-    PARAM1=$(vcs sanitize-branch-name "$1")
-    PARAM2=$(vcs sanitize-branch-name "$2")
-    PARAM3=$(vcs sanitize-branch-name "$3")
+# vc branch-rename newname
+# vc branch-rename newname -f|--force
+# vc branch-rename oldname newname
+# vc branch-rename oldname newname -f|--force
+function vc-branch-rename() {
+    PARAM1=$(vc sanitize-branch-name "$1")
+    PARAM2=$(vc sanitize-branch-name "$2")
+    PARAM3=$(vc sanitize-branch-name "$3")
     FORCE='false'
 
     # Determine if the force flag was provided
@@ -208,53 +207,53 @@ function vcs-branch-rename() {
         FORCE='true'
     fi
 
-    # vcs branch-rename newname
+    # vc branch-rename newname
     if [ "$PARAM2" == '' ]; then
         git branch -m "$PARAM1"
         return 0
     fi
 
-    # vcs branch-rename newname -f
+    # vc branch-rename newname -f
     if [ "$PARAM3" == '' ] && [ "$FORCE" == 'true' ]; then
-        OLDNAME=$(vcs current-branch)
+        OLDNAME=$(vc current-branch)
         git branch -m "$PARAM1" && git push origin ":$OLDNAME" "$PARAM1"
         return 0
     fi
 
-    # vcs branch-rename oldname newname
+    # vc branch-rename oldname newname
     if [ "$PARAM3" == '' ]; then
         git branch -m "$PARAM1" "$PARAM2"
         return 0
     fi
 
-    # vcs branch-rename oldname newname -f
+    # vc branch-rename oldname newname -f
     if [ "$FORCE" == 'true' ]; then
         git branch -m "$PARAM1" "$PARAM2" && git push origin ":$PARAM1" "$PARAM2"
     fi
 }
 
-function vcs-discard() {
+function vc-discard() {
     # TODO: Add support for single file discards
 
     git checkout . && git reset --hard
 }
 
-function vcs-master() {
-    vcs checkout master && vcs pull
+function vc-master() {
+    vc checkout master && vc pull
 }
 
-function vcs-merge() {
+function vc-merge() {
     # No second argument was provided, perform default git merge
     if [ -z $2 ]; then
         git merge $1
         return 0
     fi
 
-    CURRENTBRANCH=$(vcs current-branch)
+    CURRENTBRANCH=$(vc current-branch)
     FROM=$1
     TO=$2
-    FROM_EXISTS=$(vcs branch-exists "$FROM")
-    TO_EXISTS=$(vcs branch-exists "$TO")
+    FROM_EXISTS=$(vc branch-exists "$FROM")
+    TO_EXISTS=$(vc branch-exists "$TO")
 
     if [ "$FROM" == "$TO" ]; then
         echo "The 'from' and 'to' branch may not be equal!"
@@ -272,41 +271,41 @@ function vcs-merge() {
     fi
 
     # Stash all (un)stashed files before we continue
-    STASHED_CHANGES=$(vcs stash -u)
+    STASHED_CHANGES=$(vc stash -u)
 
     # We chain what happens next so that execution is terminated on failure
-    vcs checkout "$FROM" && vcs pull && vcs checkout "$TO" && vcs pull && vcs merge "$FROM"
+    vc checkout "$FROM" && vc pull && vc checkout "$TO" && vc pull && vc merge "$FROM"
 
     # Should we push?
     if [ "$3" == "--push" ] ; then
-        WHICH=$(vcs current-branch)
+        WHICH=$(vc current-branch)
 
         # Make absolutely sure we're about to push the correct branch
         if [ "$WHICH" == "$TO" ]; then
-            vcs push
+            vc push
         fi
     fi
 
     # Make sure the user end where he started: on his own branch with his own stuff
     if [ "$TO" != "$CURRENTBRANCH" ]; then
-        vcs checkout "$CURRENTBRANCH"
+        vc checkout "$CURRENTBRANCH"
     fi
 
     # If there were any stashed changes pop them back on the branch
     if [ "$STASHED_CHANGES" != 'No local changes to save' ]; then
-        vcs stash pop
+        vc stash pop
     fi
 }
 
-function vcs-pull-request() {
+function vc-pull-request() {
     # TODO: Add support for a pull request base (compare branch x with branch y)
 
-    BRANCH=$(vcs current-branch)
+    BRANCH=$(vc current-branch)
     ENDPOINT=''
     PUSH_URL=$(git remote get-url --push origin)
 
     # We need to push first to make sure we have a remote push url
-    vcs push
+    vc push
 
     # Render the PR endpoint for github
     if [[ $PUSH_URL == *"github.com"* ]]; then
@@ -334,12 +333,12 @@ function vcs-pull-request() {
     $METHOD $ENDPOINT
 }
 
-function vcs-push() {
-    BRANCH=$(vcs current-branch)
+function vc-push() {
+    BRANCH=$(vc current-branch)
     git push -u origin $BRANCH
 }
 
-function vcs-sanitize-branch-name() {
+function vc-sanitize-branch-name() {
     BRANCH=$1
 
     # TODO: Take care of percentage signs
@@ -350,7 +349,7 @@ function vcs-sanitize-branch-name() {
     echo "$BRANCH"
 }
 
-function vcs-search() {
+function vc-search() {
     IFS=$'\n'
     PHRASE=$1
     DONTFETCH=$2;
@@ -376,7 +375,7 @@ function vcs-search() {
             return 0
         fi
 
-        vcs fetch --all &> /dev/null && vcs search $PHRASE -s
+        vc fetch --all &> /dev/null && vc search $PHRASE -s
         return 0
     fi
 
@@ -395,7 +394,7 @@ function vcs-search() {
     done
 }
 
-function vcs-select-result() {
+function vc-select-result() {
     RESULTS=$1
     RESULTCOUNT=0
     RESULTREMAP=()
