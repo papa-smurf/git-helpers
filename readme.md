@@ -27,7 +27,7 @@ Alternatively you can put the contents of `git-helpers.sh` directly in your `.ba
 One thing that helps git-helpers stand out is the ability to find and select branches. When using the `checkout` helper for example you are not required to specify the entire branch name:
 
 ```shell
-$ vcs checkout bug/
+$ vc checkout bug/
 1) bug/something_fixed
 2) bug/something_different_fixed
 Pick a number [1-2]:
@@ -35,12 +35,12 @@ Pick a number [1-2]:
 
 This is very helpful in situations where you have a large number of branches and aren't able to keep track of all of them.
 
-## Why vcs?
+## Why vc?
 
-VCS stands for version control system. In case you'd rather use something else, like `gh` for example, you can easily do so by defining an alias:
+VC stands for version control. In case you'd rather use something else, like `gh` for example, you can easily do so by defining an alias:
 
 ```shell
-alias gh='vcs'
+alias gh='vc'
 ```
 
 ## Disclaimer
